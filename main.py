@@ -60,17 +60,30 @@ def get_bout_duration_from_start_and_stop_times(df):
     return df
 
 
-def get_behaviour_data_for_each_subject(clean_input_data):
+def get_interbout_durations(df):
+    ### needs some work###
+    df['previous_stop_time'] = df['Stop (s)'].shift()
+    df['previous_subject'] = df['Subject'].shift()
+    df['previous_observation'] = df['Observation id'].shift()
+    # confirm whether this needs to be part of it
+    # df['previous_behaviour'] = df['Behavior'].shift()
+
+    df['interbout duration'] = df[['Observation id', 'Subject', 'Start (s)', 'previous_stop_time',
+                                   'previous_subject', 'previous_observation']].apply(
+        lambda x: x['Start (s)'] - x['previous_stop_time']
+        if (x['Subject'] == x['previous_subject']
+            and x['Observation id'] == x['previous_observation']) else float('nan'), axis=1)
+    df.drop(columns=['previous_stop_time',
+            'previous_subject', 'previous_observation'], inplace=True)
+    return df
+
+
+def get_behaviour_data_for_each_subject(df):
     # get count of bouts, total bout length, mean bout length, variance for bout length
-    basic_stats = clean_input_data.groupby(['Subject']).agg(
-        {'Observation id': ['count'], 'Duration (s)': ['sum', 'mean', 'var']})
+    basic_stats = df.groupby(['Subject', 'Behavior']).agg({'Observation id': ['count'],
+                                                           'Duration (s)': ['sum', 'mean', 'var'],
+                                                           'interbout duration': ['mean', 'var']})
     return basic_stats
-
-
-def other_stats():
-    # average interbout interval + SD/variance
-    # % bout per location
-    pass
 
 
 # testing while working !!
@@ -79,5 +92,6 @@ concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
 with_cage = assign_cage_number_from_observation_id_to_subject(modified)
 with_bout_duration = get_bout_duration_from_start_and_stop_times(with_cage)
+with_interbout_duration = get_interbout_durations(with_bout_duration)
 to_output = get_behaviour_data_for_each_subject(with_bout_duration)
 write_to_excel(to_output)
