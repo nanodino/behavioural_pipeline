@@ -3,6 +3,12 @@ from pathlib import Path
 from glob import glob
 import csv
 
+
+def write_to_excel(df_to_output: pd.DataFrame) -> None:
+    with pd.ExcelWriter("./exceltest.xlsx") as writer:
+        df_to_output.to_excel(writer)
+
+
 def get_input_data_files() -> dict:
     data_path = Path("./data/")
     data_files = glob('*.tsv', root_dir=data_path, recursive=False)
