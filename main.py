@@ -42,6 +42,19 @@ def get_behaviour_modifiers(concatenated: pd.DataFrame) -> pd.DataFrame:
     return concatenated
 
 
+def assign_cage_number_from_observation_id_to_subject(modified: pd.DataFrame) -> pd.DataFrame:
+    '''
+    gets cage number from observation id and assigns it to subject 
+    so that e.g. DBA becomes 18-DBA or 23-DBA, allowing the Subject 
+    column to differentiate between mice of the same strain in 
+    different cages.
+    '''
+    modified['Subject'] = modified[['Observation id', 'Subject']].apply(
+        lambda x: f'{x["Observation id"].split(" ", 1)[0]}-{x["Subject"]}', axis=1)
+    print(modified)
+    return modified
+
+
 def get_behaviour_data_for_each_subject(clean_data):
     # get number of bouts total
 
