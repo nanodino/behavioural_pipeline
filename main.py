@@ -9,20 +9,45 @@ def write_to_excel(df_to_output: pd.DataFrame) -> None:
         df_to_output.to_excel(writer)
 
 
-def get_input_data_files() -> dict:
+def get_input_data_files() -> dict[str, pd.DataFrame]:
     data_path = Path("./data/")
-    data_files = glob('*.tsv', root_dir=data_path, recursive=False)
-    dfs_dict = {}
+    # check if I can get all the data from the aggregated tables??
+    data_files = glob('AGG*.tsv', root_dir=data_path, recursive=False)
+    input_data_tables_dict = {}
     columns_of_interest = ['Observation id',
-                           'Observation date', 'Subject', 'Behavior',
-                           'Modifier #1', 'Modifier #2', 'Time',
-                           'Behavior type', 'Start (s)', 'Stop (s)', 'Duration (s)']
+                           'Subject', 'Behavior',
+                           'Modifier #1', 'Modifier #2',
+                           'Behavior type', 'Start (s)', 'Stop (s)']
 
     for file in data_files:
         print(f'Reading columns for file {file}')
         with open(f'{data_path}/{file}') as f:
-            dfs_dict[file] = pd.read_csv(f, delimiter='\t')
-            dfs_dict[file].drop(columns=[col for col in dfs_dict[file]
-                                         if col not in columns_of_interest], inplace=True)
+            input_data_tables_dict[file] = pd.read_csv(f, delimiter='\t')
+            input_data_tables_dict[file].drop(columns=[col for col in input_data_tables_dict[file]
+                                                       if col not in columns_of_interest], inplace=True)
 
-    return dfs_dict
+    return input_data_tables_dict
+
+
+def concatenate_data_from_all_observations(test_output) -> pd.DataFrame:
+    return pd.concat(test_output)
+
+
+def get_behaviour_modifiers(concatenated: pd.DataFrame) -> pd.DataFrame:
+    concatenated['Modifier #1'] = concatenated[['Behavior', 'Modifier #1']].apply(
+        lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else x['Modifier #1'], axis=1)
+    concatenated['Behavior'] = concatenated[['Behavior']].apply(lambda x: x['Behavior'].split(
+        "_", 1)[0] if len(x['Behavior'].split('_')) > 1 else x['Behavior'], axis=1)
+
+    return concatenated
+
+
+def get_behaviour_data_for_each_subject(clean_data):
+    # get number of bouts total
+
+    # get average bout length + SD/variance
+    # total bout length
+    # average interbout interval + SD/variance
+    # % bout per location
+    pass
+
