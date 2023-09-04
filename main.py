@@ -29,30 +29,35 @@ def get_input_data_files() -> dict[str, pd.DataFrame]:
     return input_data_tables_dict
 
 
-def concatenate_data_from_all_observations(test_output) -> pd.DataFrame:
-    return pd.concat(test_output)
+def concatenate_data_from_all_observations(all_input_files) -> pd.DataFrame:
+    return pd.concat(all_input_files)
 
 
-def get_behaviour_modifiers(concatenated: pd.DataFrame) -> pd.DataFrame:
-    concatenated['Modifier #1'] = concatenated[['Behavior', 'Modifier #1']].apply(
+def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
+    df['Modifier #1'] = df[['Behavior', 'Modifier #1']].apply(
         lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else x['Modifier #1'], axis=1)
-    concatenated['Behavior'] = concatenated[['Behavior']].apply(lambda x: x['Behavior'].split(
+    df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
         "_", 1)[0] if len(x['Behavior'].split('_')) > 1 else x['Behavior'], axis=1)
 
-    return concatenated
+    return df
 
 
-def assign_cage_number_from_observation_id_to_subject(modified: pd.DataFrame) -> pd.DataFrame:
+def assign_cage_number_from_observation_id_to_subject(df: pd.DataFrame) -> pd.DataFrame:
     '''
     gets cage number from observation id and assigns it to subject 
     so that e.g. DBA becomes 18-DBA or 23-DBA, allowing the Subject 
     column to differentiate between mice of the same strain in 
     different cages.
     '''
-    modified['Subject'] = modified[['Observation id', 'Subject']].apply(
+    df['Subject'] = df[['Observation id', 'Subject']].apply(
         lambda x: f'{x["Observation id"].split(" ", 1)[0]}-{x["Subject"]}', axis=1)
-    print(modified)
-    return modified
+    return df
+
+
+def get_bout_duration_from_start_and_stop_times(df):
+    df['Duration (s)'] = df[['Start (s)', 'Stop (s)']].apply(
+        lambda x: x['Stop (s)'] - x['Start (s)'], axis=1)
+    return df
 
 
 def get_behaviour_data_for_each_subject(clean_data):
