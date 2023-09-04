@@ -60,11 +60,14 @@ def get_bout_duration_from_start_and_stop_times(df):
     return df
 
 
-def get_behaviour_data_for_each_subject(clean_data):
-    # get number of bouts total
+def get_behaviour_data_for_each_subject(clean_input_data):
+    # get count of bouts, total bout length, mean bout length, variance for bout length
+    basic_stats = clean_input_data.groupby(['Subject']).agg(
+        {'Observation id': ['count'], 'Duration (s)': ['sum', 'mean', 'sd']})
+    return basic_stats
 
-    # get average bout length + SD/variance
-    # total bout length
+
+def other_stats():
     # average interbout interval + SD/variance
     # % bout per location
     pass
