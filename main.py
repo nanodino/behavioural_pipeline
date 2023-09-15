@@ -10,9 +10,9 @@ def write_to_excel(df_to_output: pd.DataFrame) -> None:
 
 
 def get_input_data_files() -> dict[str, pd.DataFrame]:
-    data_path = Path("./data/")
+    data_path = Path("./new_data/")
     # check if I can get all the data from the aggregated tables??
-    data_files = glob('AGG*.tsv', root_dir=data_path, recursive=False)
+    data_files = glob('*.tsv', root_dir=data_path, recursive=False)
     input_data_tables_dict = {}
     columns_of_interest = ['Observation id',
                            'Subject', 'Behavior',
@@ -34,8 +34,8 @@ def concatenate_data_from_all_observations(all_input_files) -> pd.DataFrame:
 
 
 def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
-    df['Modifier #1'] = df[['Behavior', 'Modifier #1']].apply(
-        lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else x['Modifier #1'], axis=1)
+    df['Modifier #1'] = df[['Behavior', 'Modifier']].apply(
+        lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else '', axis=1)
     df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
         "_", 1)[0] if len(x['Behavior'].split('_')) > 1 else x['Behavior'], axis=1)
 
@@ -61,7 +61,7 @@ def get_bout_duration_from_start_and_stop_times(df):
 
 
 def get_interbout_durations(df):
-    ### needs some work###
+    # needs some work##
     df['previous_stop_time'] = df['Stop (s)'].shift()
     df['previous_subject'] = df['Subject'].shift()
     df['previous_observation'] = df['Observation id'].shift()
