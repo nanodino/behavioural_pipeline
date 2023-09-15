@@ -33,7 +33,7 @@ def concatenate_data_from_all_observations(all_input_files) -> pd.DataFrame:
 
 
 def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
-    df['Modifier #1'] = df[['Behavior', 'Modifier']].apply(
+    df['Modifier'] = df[['Behavior']].apply(
         lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else '', axis=1)
     df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
         "_", 1)[0] if len(x['Behavior'].split('_')) > 1 else x['Behavior'], axis=1)
@@ -41,27 +41,25 @@ def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def get_bout_duration_from_start_and_stop_times(df):
-    df['Duration (s)'] = df[['Start (s)', 'Stop (s)']].apply(
-        lambda x: x['Stop (s)'] - x['Start (s)'], axis=1)
-    return df
+def match_start_and_stop(df: pd.DataFrame) -> pd.DataFrame:
+    start_dataframe = df[df['Behavior type'] == 'START']
+    stop_dataframe = df[df['Behavior type'] == 'STOP']
 
+    start_dataframe['start_id'] = start_dataframe.groupby(
+        ['Subject', 'Behavior', 'Observation id']).cumcount()
+    stop_dataframe['stop_id'] = stop_dataframe.groupby(
+        ['Subject', 'Behavior', 'Observation id']).cumcount()
 
-def get_interbout_durations(df):
-    # needs some work##
-    df['previous_stop_time'] = df['Stop (s)'].shift()
-    df['previous_subject'] = df['Subject'].shift()
-    df['previous_observation'] = df['Observation id'].shift()
-    # confirm whether this needs to be part of it
-    # df['previous_behaviour'] = df['Behavior'].shift()
+    merged_df = pd.merge(start_dataframe, stop_dataframe, how='left', left_on=[
+        'Subject', 'Behavior', 'Observation id', 'start_id', 'Modifier'],
+        right_on=['Subject', 'Behavior', 'Observation id', 'stop_id', 'Modifier'], suffixes=["_start", "_stop"])
 
-    df['interbout duration'] = df[['Observation id', 'Subject', 'Start (s)', 'previous_stop_time',
-                                   'previous_subject', 'previous_observation']].apply(
-        lambda x: x['Start (s)'] - x['previous_stop_time']
-        if (x['Subject'] == x['previous_subject']
-            and x['Observation id'] == x['previous_observation']) else float('nan'), axis=1)
-    df.drop(columns=['previous_stop_time',
-            'previous_subject', 'previous_observation'], inplace=True)
+    merged_df.drop(columns=['start_id', 'stop_id',
+                   'Behavior type_start', 'Behavior type_stop'], inplace=True)
+
+    merged_df['Duration (s)'] = merged_df[['Time_stop', 'Time_start']].apply(
+        lambda x: x['Time_stop'] - x['Time_start'], axis=1)
+
     return df
 
 
