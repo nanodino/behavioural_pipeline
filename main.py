@@ -16,8 +16,7 @@ def get_input_data_files() -> dict[str, pd.DataFrame]:
     input_data_tables_dict = {}
     columns_of_interest = ['Observation id',
                            'Subject', 'Behavior',
-                           'Modifier #1', 'Modifier #2',
-                           'Behavior type', 'Start (s)', 'Stop (s)']
+                           'Behavior type', 'Time']
 
     for file in data_files:
         print(f'Reading columns for file {file}')
