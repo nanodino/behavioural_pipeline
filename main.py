@@ -4,9 +4,16 @@ from glob import glob
 import csv
 
 
-def write_to_excel(df_to_output: pd.DataFrame) -> None:
-    with pd.ExcelWriter("./exceltest.xlsx") as writer:
-        df_to_output.to_excel(writer)
+def write_to_excel(summary_df: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
+
+    # first rearrange columns for full data df
+    full_data_df = full_data_df[['Observation id', 'Subject', 'Behavior', 'Modifier',
+                                 'Time_start', 'Time_stop', 'Duration (s)', 'end of last bout', 'interbout duration']]
+
+    with pd.ExcelWriter("./clean_data.xlsx") as writer:
+        full_data_df.round(2).to_excel(writer)
+    with pd.ExcelWriter("./summary_data.xlsx") as writer:
+        summary_df.round(2).to_excel(writer)
 
 
 def get_input_data_files() -> dict[str, pd.DataFrame]:
@@ -60,6 +67,15 @@ def match_start_and_stop(df: pd.DataFrame) -> pd.DataFrame:
     merged_df['Duration (s)'] = merged_df[['Time_stop', 'Time_start']].apply(
         lambda x: x['Time_stop'] - x['Time_start'], axis=1)
 
+    return merged_df
+
+
+def get_time_between_bouts(df: pd.DataFrame) -> pd.DataFrame:
+    df['end of last bout'] = df.groupby(
+        ['Subject', 'Behavior', 'Observation id'])['Time_stop'].shift()
+    df['interbout duration'] = df[['Time_start', 'end of last bout']].apply(
+        lambda x: x['Time_start'] - x['end of last bout'], axis=1)
+
     return df
 
 
@@ -69,13 +85,13 @@ def get_behaviour_data_for_each_subject(df):
                                                            'Duration (s)': ['sum', 'mean', 'var'],
                                                            'interbout duration': ['mean', 'var']})
     return basic_stats
-
-
 # testing while working !!
+
+
 test_output = get_input_data_files()
 concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
-with_bout_duration = get_bout_duration_from_start_and_stop_times(modified)
-with_interbout_duration = get_interbout_durations(with_bout_duration)
-to_output = get_behaviour_data_for_each_subject(with_bout_duration)
-write_to_excel(to_output)
+matched = match_start_and_stop(modified)
+interbout = get_time_between_bouts(matched)
+summary = get_behaviour_data_for_each_subject(interbout)
+write_to_excel(summary, interbout)
