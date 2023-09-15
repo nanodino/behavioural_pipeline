@@ -42,18 +42,6 @@ def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def assign_cage_number_from_observation_id_to_subject(df: pd.DataFrame) -> pd.DataFrame:
-    '''
-    gets cage number from observation id and assigns it to subject 
-    so that e.g. DBA becomes 18-DBA or 23-DBA, allowing the Subject 
-    column to differentiate between mice of the same strain in 
-    different cages.
-    '''
-    df['Subject'] = df[['Observation id', 'Subject']].apply(
-        lambda x: f'{x["Observation id"].split(" ", 1)[0]}-{x["Subject"]}', axis=1)
-    return df
-
-
 def get_bout_duration_from_start_and_stop_times(df):
     df['Duration (s)'] = df[['Start (s)', 'Stop (s)']].apply(
         lambda x: x['Stop (s)'] - x['Start (s)'], axis=1)
@@ -90,8 +78,7 @@ def get_behaviour_data_for_each_subject(df):
 test_output = get_input_data_files()
 concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
-with_cage = assign_cage_number_from_observation_id_to_subject(modified)
-with_bout_duration = get_bout_duration_from_start_and_stop_times(with_cage)
+with_bout_duration = get_bout_duration_from_start_and_stop_times(modified)
 with_interbout_duration = get_interbout_durations(with_bout_duration)
 to_output = get_behaviour_data_for_each_subject(with_bout_duration)
 write_to_excel(to_output)
