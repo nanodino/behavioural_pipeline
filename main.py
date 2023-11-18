@@ -99,24 +99,29 @@ def get_behaviour_data_for_each_subject(df):
     basic_stats.reset_index(inplace=True)
     basic_stats.fillna(0, inplace=True)
     basic_stats.set_index('Subject', inplace=True)
-    basic_stats.rename(columns={'Observation id_count_BKFL': 'BKFL bouts',
-                                'Observation id_count_LIRDRT': 'LIRDRT bouts',
-                                'Observation id_count_RT': 'RT bouts',
-                                'Observation id_count_TWRL': 'TWRL bouts',
-                                'Duration (s)_mean_BKFL': 'BKFL mean bout duration (s)',
-                                'Duration (s)_mean_LIRDRT': 'LIRDRT mean bout duration (s)',
-                                'Duration (s)_mean_RT': 'RT mean bout duration (s)',
-                                'Duration (s)_mean_TWRL': 'TWRL mean bout duration (s)',
-                                'Duration (s)_sum_BKFL': 'BKFL total bout duration (s)',
-                                'Duration (s)_sum_LIRDRT': 'LIRDRT total bout duration (s)',
-                                'Duration (s)_sum_RT': 'RT total bout duration (s)',
-                                'Duration (s)_sum_TWRL': 'TWRL total bout duration (s)',
-                                'Duration (s)_var_BKFL': 'BKFL bout duration variance',
-                                'Duration (s)_var_LIRDRT': 'LIRDRT bout duration variance',
-                                'Duration (s)_var_RT': 'RT bout duration variance',
-                                'Duration (s)_var_TWRL': 'TWRL bout duration variance'}, inplace=True)
+    # rename columns using function below
+    basic_stats.rename(columns=get_column_name_for_summary_df, inplace=True)
 
     return basic_stats
+
+
+def get_column_name_for_summary_df(column_name):
+    column_name = column_name.replace('Observation id_', '')
+    if column_name.startswith('count'):
+        behaviour = column_name.split("_")[1]
+        modifier = column_name.split("_")[2]
+        return f'{behaviour} {modifier} bout count'
+    elif column_name.startswith('Duration (s)_'):
+        parts = column_name.split("_")
+        behaviour = parts[2]
+        modifier = parts[3]
+        if parts[1] == 'sum':
+            return f'{behaviour} {modifier} total bout length (s)'
+        elif parts[1] == 'mean':
+            return f'{behaviour} {modifier} mean bout length (s)'
+        elif parts[1] == 'var':
+            return f'{behaviour} {modifier} variance bout length (s)'
+    return column_name
 
 
 def get_proportion_of_time_in_area_for_behaviour_for_subject(subject, behaviour, modifier):
