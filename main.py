@@ -1,7 +1,6 @@
 import pandas as pd
 from pathlib import Path
 from glob import glob
-import csv
 
 
 def write_to_excel(summary_df: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
@@ -18,7 +17,6 @@ def write_to_excel(summary_df: pd.DataFrame, full_data_df: pd.DataFrame) -> None
 
 def get_input_data_files() -> dict[str, pd.DataFrame]:
     data_path = Path("./new_data/")
-    # check if I can get all the data from the aggregated tables??
     data_files = glob('*.tsv', root_dir=data_path, recursive=False)
     input_data_tables_dict = {}
     columns_of_interest = ['Observation id',
@@ -85,7 +83,6 @@ def get_behaviour_data_for_each_subject(df):
                                                            'Duration (s)': ['sum', 'mean', 'var'],
                                                            'interbout duration': ['mean', 'var']})
     return basic_stats
-# testing while working !!
 
 
 test_output = get_input_data_files()
