@@ -99,6 +99,22 @@ def get_behaviour_data_for_each_subject(df):
     basic_stats.reset_index(inplace=True)
     basic_stats.fillna(0, inplace=True)
     basic_stats.set_index('Subject', inplace=True)
+    basic_stats.rename(columns={'Observation id_count_BKFL': 'BKFL bouts',
+                                'Observation id_count_LIRDRT': 'LIRDRT bouts',
+                                'Observation id_count_RT': 'RT bouts',
+                                'Observation id_count_TWRL': 'TWRL bouts',
+                                'Duration (s)_mean_BKFL': 'BKFL mean bout duration (s)',
+                                'Duration (s)_mean_LIRDRT': 'LIRDRT mean bout duration (s)',
+                                'Duration (s)_mean_RT': 'RT mean bout duration (s)',
+                                'Duration (s)_mean_TWRL': 'TWRL mean bout duration (s)',
+                                'Duration (s)_sum_BKFL': 'BKFL total bout duration (s)',
+                                'Duration (s)_sum_LIRDRT': 'LIRDRT total bout duration (s)',
+                                'Duration (s)_sum_RT': 'RT total bout duration (s)',
+                                'Duration (s)_sum_TWRL': 'TWRL total bout duration (s)',
+                                'Duration (s)_var_BKFL': 'BKFL bout duration variance',
+                                'Duration (s)_var_LIRDRT': 'LIRDRT bout duration variance',
+                                'Duration (s)_var_RT': 'RT bout duration variance',
+                                'Duration (s)_var_TWRL': 'TWRL bout duration variance'}, inplace=True)
 
     return basic_stats
 
