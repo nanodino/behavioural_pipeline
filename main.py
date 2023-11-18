@@ -2,6 +2,12 @@ import pandas as pd
 from pathlib import Path
 from glob import glob
 
+BR_AREAS = ['A', 'B', 'C', 'D']
+RT_AREAS = ['H', 'I', 'J']
+TWRL_AREAS = ['A', 'D']
+BKFL_AREAS = ['E', 'F']
+LIRDRT_AREAS = ['A', 'D']
+
 
 def write_to_excel(summary_df: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
 
@@ -79,10 +85,26 @@ def get_time_between_bouts(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_behaviour_data_for_each_subject(df):
     # get count of bouts, total bout length, mean bout length, variance for bout length
-    basic_stats = df.groupby(['Subject', 'Behavior']).agg({'Observation id': ['count'],
-                                                           'Duration (s)': ['sum', 'mean', 'var'],
-                                                           'interbout duration': ['mean', 'var']})
+    basic_stats = df.groupby(['Subject', 'Behavior', 'Modifier']).agg({'Observation id': ['count'],
+                                                                       'Duration (s)': ['sum', 'mean', 'var']})
+    basic_stats.columns = basic_stats.columns.map('_'.join)
+    basic_stats.reset_index(inplace=True)
+    # make a column for each behaviour-modifier pair
+    basic_stats['behaviour_modifier'] = basic_stats[['Behavior', 'Modifier']].apply(
+        lambda x: f'{x["Behavior"]}_{x["Modifier"]}', axis=1)
+    basic_stats.drop(columns=['Behavior', 'Modifier'], inplace=True)
+    basic_stats.set_index('Subject', inplace=True)
+    basic_stats = basic_stats.pivot(columns='behaviour_modifier')
+    basic_stats.columns = basic_stats.columns.map('_'.join)
+    basic_stats.reset_index(inplace=True)
+    basic_stats.fillna(0, inplace=True)
+    basic_stats.set_index('Subject', inplace=True)
+
     return basic_stats
+
+
+def get_proportion_of_time_in_area_for_behaviour_for_subject(subject, behaviour, modifier):
+    pass
 
 
 test_output = get_input_data_files()
