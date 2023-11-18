@@ -1,0 +1,8 @@
+for the summary:
+
+- How is the variance calculated? Is it standardized? It needs to be, if not.
+- The format needs to be different. There needs to be a single index (the subject), 
+each behaviour needs to have a set of columns (one for count, one for sum, etc)
+- interbout duraction and variance (standardized) need to be across all behaviours and not per behaviour
+(behaviours that don't apply to a subject don't need to be considered)
+- add each location as a proportion of the count for each behaviour
