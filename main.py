@@ -101,6 +101,13 @@ def get_behaviour_data_for_each_subject(df):
     basic_stats.set_index('Subject', inplace=True)
     # rename columns using function below
     basic_stats.rename(columns=get_column_name_for_summary_df, inplace=True)
+    basic_stats['interbout duration mean'] = df.groupby(['Subject'])[
+        'interbout duration'].mean()
+    basic_stats['interbout duration variance'] = df.groupby(['Subject'])[
+        'interbout duration'].var()
+    basic_stats['interbout duration standard deviation'] = df.groupby(['Subject'])[
+        'interbout duration'].std()
+    basic_stats.reset_index(inplace=True)
 
     return basic_stats
 
