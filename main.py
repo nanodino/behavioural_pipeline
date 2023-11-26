@@ -10,12 +10,13 @@ BKFL_AREAS = ['E', 'F']
 LIRDRT_AREAS = ['A', 'D']
 
 
-def write_to_excel(summary_dfs: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
+def write_to_excel(summary_dfs: pd.DataFrame, full_data_df: pd.DataFrame, partitioned) -> None:
     full_data_df = full_data_df[['Observation id', 'Subject', 'Behavior', 'Modifier',
                                  'Time_start', 'Time_stop', 'Duration (s)', 'end of last bout', 'interbout duration']]
 
     with pd.ExcelWriter("./observation_data.xlsx") as writer:
         full_data_df.round(2).to_excel(writer, sheet_name='Full data')
+        partitioned.round(2).to_excel(writer, sheet_name='time proportions')
 
         names = ['Bout counts', 'Total bout length', 'Mean bout length',
                  'Bout length variance', 'Bout length standard deviation', 'Interbout duration Statistics']
@@ -153,11 +154,33 @@ def divide_statistics(df) -> List[pd.DataFrame]:
     return [counts, totals, means, variances, stds, interbout]
 
 
+def get_proportion_of_time_for_modifiers(df: pd.DataFrame) -> pd.DataFrame:
+    df = get_total_time_doing_behaviour(df)
+    return df
+
+
+def get_total_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
+    time_df = df.groupby(['Subject', 'Behavior', 'Modifier'])[
+        'Duration (s)'].agg('sum')
+    time_df = time_df.reset_index()
+    time_df.rename(columns={'Duration (s)': 'total time'}, inplace=True)
+    # pivot to get the total time for each behaviour and the proportion of time spent doing each modifier
+    pivot_df = time_df.pivot_table(index=['Subject', 'Behavior'], columns=[
+        'Modifier'], values='total time', aggfunc='sum')
+    pivot_df = pivot_df.div(pivot_df.sum(axis=1), axis=0)
+    pivot_df = pivot_df.reset_index()
+    pivot_df.fillna(0, inplace=True)
+    pivot_df.set_index('Subject', inplace=True)
+
+    return pivot_df
+
+
 test_output = get_input_data_files()
 concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
 matched = match_start_and_stop(modified)
 interbout = get_time_between_bouts(matched)
 summary = get_behaviour_data_for_each_subject(interbout)
+partitioned = get_proportion_of_time_for_modifiers(interbout)
 divided = divide_statistics(summary)
-write_to_excel(divided, interbout)
+write_to_excel(divided, interbout, partitioned)
