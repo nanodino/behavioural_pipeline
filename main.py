@@ -86,7 +86,7 @@ def get_time_between_bouts(df: pd.DataFrame) -> pd.DataFrame:
 def get_behaviour_data_for_each_subject(df):
     # get count of bouts, total bout length, mean bout length, variance for bout length
     basic_stats = df.groupby(['Subject', 'Behavior', 'Modifier']).agg({'Observation id': ['count'],
-                                                                       'Duration (s)': ['sum', 'mean', 'var']})
+                                                                       'Duration (s)': ['sum', 'mean', 'var', 'std']})
     basic_stats.columns = basic_stats.columns.map('_'.join)
     basic_stats.reset_index(inplace=True)
     # make a column for each behaviour-modifier pair
