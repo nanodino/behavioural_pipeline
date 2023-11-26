@@ -76,7 +76,7 @@ def match_start_and_stop(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_time_between_bouts(df: pd.DataFrame) -> pd.DataFrame:
     df['end of last bout'] = df.groupby(
-        ['Subject', 'Behavior', 'Observation id'])['Time_stop'].shift()
+        ['Subject', 'Observation id'])['Time_stop'].shift()
     df['interbout duration'] = df[['Time_start', 'end of last bout']].apply(
         lambda x: x['Time_start'] - x['end of last bout'], axis=1)
 
