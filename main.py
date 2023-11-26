@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from glob import glob
+from typing import List
 
 BR_AREAS = ['A', 'B', 'C', 'D']
 RT_AREAS = ['H', 'I', 'J']
@@ -9,16 +10,19 @@ BKFL_AREAS = ['E', 'F']
 LIRDRT_AREAS = ['A', 'D']
 
 
-def write_to_excel(summary_df: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
-
-    # first rearrange columns for full data df
+def write_to_excel(summary_dfs: pd.DataFrame, full_data_df: pd.DataFrame) -> None:
     full_data_df = full_data_df[['Observation id', 'Subject', 'Behavior', 'Modifier',
                                  'Time_start', 'Time_stop', 'Duration (s)', 'end of last bout', 'interbout duration']]
 
-    with pd.ExcelWriter("./clean_data.xlsx") as writer:
-        full_data_df.round(2).to_excel(writer)
-    with pd.ExcelWriter("./summary_data.xlsx") as writer:
-        summary_df.round(2).to_excel(writer)
+    with pd.ExcelWriter("./observation_data.xlsx") as writer:
+        full_data_df.round(2).to_excel(writer, sheet_name='Full data')
+
+        names = ['Bout counts', 'Total bout length', 'Mean bout length',
+                 'Bout length variance', 'Bout length standard deviation', 'Interbout duration Statistics']
+
+        for df in summary_dfs:
+            df = df[['Subject'] + [col for col in df.columns if col != 'Subject']]
+            df.round(2).to_excel(writer, sheet_name=names.pop(0))
 
 
 def get_input_data_files() -> dict[str, pd.DataFrame]:
@@ -127,8 +131,26 @@ def get_column_name_for_summary_df(column_name):
         elif parts[1] == 'mean':
             return f'{behaviour}_{modifier} mean bout length (s)'
         elif parts[1] == 'var':
-            return f'{behaviour}_{modifier} variance bout length (s)'
+            return f'{behaviour}_{modifier}bout length  variance (s2)'
+        elif parts[1] == 'std':
+            return f'{behaviour}_{modifier} bout length standard deviation (s)'
     return column_name
+
+
+def divide_statistics(df) -> List[pd.DataFrame]:
+    means = df[df.columns[df.columns.str.contains('mean') & ~df.columns.str.contains(
+        'interbout') | df.columns.str.contains('Subject')]]
+    variances = df[df.columns[df.columns.str.contains('var') & ~df.columns.str.contains(
+        'interbout') | df.columns.str.contains('Subject')]]
+    stds = df[df.columns[df.columns.str.contains('standard') & ~df.columns.str.contains(
+        'interbout') | df.columns.str.contains('Subject')]]
+    counts = df[df.columns[df.columns.str.contains(
+        'count') | df.columns.str.contains('Subject')]]
+    interbout = df[df.columns[df.columns.str.contains(
+        'interbout') | df.columns.str.contains('Subject')]]
+    totals = df[df.columns[df.columns.str.contains(
+        'total') | df.columns.str.contains('Subject')]]
+    return [counts, totals, means, variances, stds, interbout]
 
 
 test_output = get_input_data_files()
@@ -136,6 +158,6 @@ concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
 matched = match_start_and_stop(modified)
 interbout = get_time_between_bouts(matched)
-totaled = get_(interbout)
 summary = get_behaviour_data_for_each_subject(interbout)
-write_to_excel(summary, interbout)
+divided = divide_statistics(summary)
+write_to_excel(divided, interbout)
