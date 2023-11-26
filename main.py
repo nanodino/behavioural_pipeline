@@ -116,11 +116,11 @@ def get_column_name_for_summary_df(column_name):
         behaviour = parts[2]
         modifier = parts[3]
         if parts[1] == 'sum':
-            return f'{behaviour} {modifier} total bout length (s)'
+            return f'{behaviour}_{modifier} total bout length (s)'
         elif parts[1] == 'mean':
-            return f'{behaviour} {modifier} mean bout length (s)'
+            return f'{behaviour}_{modifier} mean bout length (s)'
         elif parts[1] == 'var':
-            return f'{behaviour} {modifier} variance bout length (s)'
+            return f'{behaviour}_{modifier} variance bout length (s)'
     return column_name
 
 
