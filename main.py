@@ -137,6 +137,8 @@ def get_column_name_for_summary_df(column_name):
             return f'{behaviour}_{modifier} bout length standard deviation (s)'
     return column_name
 
+# TODO: wtf is this even, make good
+
 
 def divide_statistics(df) -> List[pd.DataFrame]:
     means = df[df.columns[df.columns.str.contains('mean') & ~df.columns.str.contains(
@@ -153,10 +155,7 @@ def divide_statistics(df) -> List[pd.DataFrame]:
         'total') | df.columns.str.contains('Subject')]]
     return [counts, totals, means, variances, stds, interbout]
 
-
-def get_proportion_of_time_for_modifiers(df: pd.DataFrame) -> pd.DataFrame:
-    df = get_total_time_doing_behaviour(df)
-    return df
+# TODO: rename, this is dumb
 
 
 def get_total_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
@@ -181,6 +180,6 @@ modified = get_behaviour_modifiers(concatenated)
 matched = match_start_and_stop(modified)
 interbout = get_time_between_bouts(matched)
 summary = get_behaviour_data_for_each_subject(interbout)
-partitioned = get_proportion_of_time_for_modifiers(interbout)
+partitioned = get_total_time_doing_behaviour(interbout)
 divided = divide_statistics(summary)
 write_to_excel(divided, interbout, partitioned)
