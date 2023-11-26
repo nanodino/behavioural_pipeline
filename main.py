@@ -117,7 +117,7 @@ def get_column_name_for_summary_df(column_name):
     if column_name.startswith('count'):
         behaviour = column_name.split("_")[1]
         modifier = column_name.split("_")[2]
-        return f'{behaviour} {modifier} bout count'
+        return f'{behaviour}_{modifier} bout count'
     elif column_name.startswith('Duration (s)_'):
         parts = column_name.split("_")
         behaviour = parts[2]
@@ -131,14 +131,11 @@ def get_column_name_for_summary_df(column_name):
     return column_name
 
 
-def get_proportion_of_time_in_area_for_behaviour_for_subject(subject, behaviour, modifier):
-    pass
-
-
 test_output = get_input_data_files()
 concatenated = concatenate_data_from_all_observations(test_output)
 modified = get_behaviour_modifiers(concatenated)
 matched = match_start_and_stop(modified)
 interbout = get_time_between_bouts(matched)
+totaled = get_(interbout)
 summary = get_behaviour_data_for_each_subject(interbout)
 write_to_excel(summary, interbout)
