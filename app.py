@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 from pathlib import Path
 from glob import glob
@@ -174,12 +175,25 @@ def get_total_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     return pivot_df
 
 
-test_output = get_input_data_files()
-concatenated = concatenate_data_from_all_observations(test_output)
-modified = get_behaviour_modifiers(concatenated)
-matched = match_start_and_stop(modified)
-interbout = get_time_between_bouts(matched)
-summary = get_behaviour_data_for_each_subject(interbout)
-partitioned = get_total_time_doing_behaviour(interbout)
-divided = divide_statistics(summary)
-write_to_excel(divided, interbout, partitioned)
+def run():
+    test_output = get_input_data_files()
+    concatenated = concatenate_data_from_all_observations(test_output)
+    modified = get_behaviour_modifiers(concatenated)
+    matched = match_start_and_stop(modified)
+    interbout = get_time_between_bouts(matched)
+    summary = get_behaviour_data_for_each_subject(interbout)
+    partitioned = get_total_time_doing_behaviour(interbout)
+    divided = divide_statistics(summary)
+    write_to_excel(divided, interbout, partitioned)
+    st.write("Done!")
+
+
+def main():
+    st.title("Behavioural analysis pipeline")
+    st.header("Welcome to the behavioural analysis pipeline!")
+    st.write("This pipeline takes in a folder of .tsv files and outputs an excel file with the data you need for behavioural analysis.")
+    st.button("Run pipeline", key='run_button', type='primary', on_click=run)
+
+
+if __name__ == "__main__":
+    main()
