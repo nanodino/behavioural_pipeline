@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 from pathlib import Path
 from glob import glob
@@ -10,7 +11,26 @@ BKFL_AREAS = ['E', 'F']
 LIRDRT_AREAS = ['A', 'D']
 
 
-def write_to_excel(summary_dfs: pd.DataFrame, full_data_df: pd.DataFrame, partitioned) -> None:
+def write_to_excel(divided, interbout, partitioned):
+    # Write your dataframes to an Excel file
+    with pd.ExcelWriter('output.xlsx') as writer:
+        for i, df in enumerate(divided):
+            df.to_excel(writer, sheet_name=f'Sheet{i+1}')
+        interbout.to_excel(writer, sheet_name='Interbout')
+        partitioned.to_excel(writer, sheet_name='Partitioned')
+
+    # Read the Excel file as bytes
+    with open('output.xlsx', 'rb') as f:
+        bytes_data = f.read()
+
+    # Create a download button for the Excel file
+    st.download_button(
+        type="primary",
+        label="Download output file",
+        data=bytes_data,
+        file_name='behavioural_output.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
     full_data_df = full_data_df[['Observation id', 'Subject', 'Behavior', 'Modifier',
                                  'Time_start', 'Time_stop', 'Duration (s)', 'end of last bout', 'interbout duration']]
 
@@ -21,25 +41,27 @@ def write_to_excel(summary_dfs: pd.DataFrame, full_data_df: pd.DataFrame, partit
         names = ['Bout counts', 'Total bout length', 'Mean bout length',
                  'Bout length variance', 'Bout length standard deviation', 'Interbout duration Statistics']
 
-        for df in summary_dfs:
+        for df in divided:
             df = df[['Subject'] + [col for col in df.columns if col != 'Subject']]
             df.round(2).to_excel(writer, sheet_name=names.pop(0))
 
 
 def get_input_data_files() -> dict[str, pd.DataFrame]:
-    data_path = Path("./new_data/")
-    data_files = glob('*.tsv', root_dir=data_path, recursive=False)
+
     input_data_tables_dict = {}
     columns_of_interest = ['Observation id',
                            'Subject', 'Behavior',
                            'Behavior type', 'Time']
-
-    for file in data_files:
-        print(f'Reading columns for file {file}')
-        with open(f'{data_path}/{file}') as f:
-            input_data_tables_dict[file] = pd.read_csv(f, delimiter='\t')
-            input_data_tables_dict[file].drop(columns=[col for col in input_data_tables_dict[file]
-                                                       if col not in columns_of_interest], inplace=True)
+    data_files = st.file_uploader(
+        "Upload your data files", type=['tsv'], accept_multiple_files=True)
+    if data_files is not None:
+        for file in data_files:
+            file.seek(0)
+            print(f'Reading columns for file {file.name}')
+            input_data_tables_dict[file.name] = pd.read_csv(
+                file, delimiter='\t')
+            input_data_tables_dict[file.name].drop(columns=[col for col in input_data_tables_dict[file.name]
+                                                            if col not in columns_of_interest], inplace=True)
 
     return input_data_tables_dict
 
@@ -174,12 +196,48 @@ def get_total_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     return pivot_df
 
 
-test_output = get_input_data_files()
-concatenated = concatenate_data_from_all_observations(test_output)
-modified = get_behaviour_modifiers(concatenated)
-matched = match_start_and_stop(modified)
-interbout = get_time_between_bouts(matched)
-summary = get_behaviour_data_for_each_subject(interbout)
-partitioned = get_total_time_doing_behaviour(interbout)
-divided = divide_statistics(summary)
-write_to_excel(divided, interbout, partitioned)
+def run(dfs):
+    concatenated = concatenate_data_from_all_observations(dfs)
+    modified = get_behaviour_modifiers(concatenated)
+    matched = match_start_and_stop(modified)
+    interbout = get_time_between_bouts(matched)
+    summary = get_behaviour_data_for_each_subject(interbout)
+    partitioned = get_total_time_doing_behaviour(interbout)
+    divided = divide_statistics(summary)
+    write_to_excel(divided, interbout, partitioned)
+
+
+def write_to_excel(divided, interbout, partitioned):
+    # Write your dataframes to an Excel file
+    with pd.ExcelWriter('output.xlsx') as writer:
+        for i, df in enumerate(divided):
+            df.to_excel(writer, sheet_name=f'Sheet{i+1}')
+        interbout.to_excel(writer, sheet_name='Interbout')
+        partitioned.to_excel(writer, sheet_name='Partitioned')
+
+    # Read the Excel file as bytes
+    with open('output.xlsx', 'rb') as f:
+        bytes_data = f.read()
+
+    # Create a download button for the Excel file
+    st.download_button(
+        label="Download output file",
+        data=bytes_data,
+        file_name='output.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+
+def main():
+    st.title("Behavioural analysis pipeline")
+    st.header("Welcome to the behavioural analysis pipeline!")
+    st.write("This pipeline takes in a folder of .tsv files and outputs an excel file with the data you need for behavioural analysis.")
+    st.write("Please upload your data files below.")
+    dfs = get_input_data_files()
+    # only run if there are files
+    if dfs:
+        run(dfs)
+
+
+if __name__ == "__main__":
+    main()
