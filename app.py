@@ -97,6 +97,7 @@ def match_start_and_stop(df: pd.DataFrame) -> pd.DataFrame:
 
     merged_df['Duration (s)'] = merged_df[['Time_stop', 'Time_start']].apply(
         lambda x: x['Time_stop'] - x['Time_start'], axis=1)
+    merged_df = merged_df[merged_df['Duration (s)'] >= 10]
 
     return merged_df
 
