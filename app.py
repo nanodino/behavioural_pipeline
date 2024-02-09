@@ -15,7 +15,7 @@ def write_to_excel(divided, interbout, partitioned):
     # Write your dataframes to an Excel file
     with pd.ExcelWriter('output.xlsx') as writer:
         for i, df in enumerate(divided):
-            df.to_excel(writer, sheet_name=f'Sheet{i+1}')
+            df.to_excel(writer, sheet_name=f'Sheet{i+1}') #TODO: give sheets actual names
         interbout.to_excel(writer, sheet_name='Interbout')
         partitioned.to_excel(writer, sheet_name='Partitioned')
 
