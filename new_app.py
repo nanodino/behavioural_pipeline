@@ -37,11 +37,20 @@ def separate_data_by_subject(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
         data_by_subject[subject] = data[data['Subject'] == subject]
     return data_by_subject
 
+def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> dict[str, pd.DataFrame]:
+    df['Modifier'] = df[['Behavior']].apply(
+        lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else '', axis=1)
+    df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
+        "_", 1)[0] if len(x['Behavior'].split('_')) > 1 else x['Behavior'], axis=1)
+
+    return df
+
 def run_pipeline(dfs: dict[str, pd.DataFrame]):
     data = concatenate_data_from_all_observations(dfs)
     data_by_subject = separate_data_by_subject(data)
-    st.write(data_by_subject)
-    st.dataframe(data_by_subject['DMO-10'])
+    for subject, df in data_by_subject.items():
+        data_by_subject[subject] = get_behaviour_modifiers(df, 'Behavior')
+    st.dataframe(data_by_subject['DMO-10'])         # for demo purposes
 
 def main():
     st.title("Behavioural analysis pipeline")
