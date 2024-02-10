@@ -37,7 +37,7 @@ def separate_data_by_subject(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
         data_by_subject[subject] = data[data['Subject'] == subject]
     return data_by_subject
 
-def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> dict[str, pd.DataFrame]:
+def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> pd.DataFrame:
     df['Modifier'] = df[['Behavior']].apply(
         lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else '', axis=1)
     df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
@@ -45,6 +45,30 @@ def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> dict[str, pd.Da
 
     return df
 
+def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
+    start_dataframe = df[df['Behavior type'] == 'START']
+    stop_dataframe = df[df['Behavior type'] == 'STOP']
+
+    start_dataframe['start_id'] = start_dataframe.groupby(
+        ['Subject', 'Behavior', 'Observation id', 'Observation date',
+         'Observation duration']).cumcount()
+    stop_dataframe['stop_id'] = stop_dataframe.groupby(
+       ['Subject', 'Behavior', 'Observation id', 'Observation date',
+         'Observation duration']).cumcount()
+
+    merged_df = pd.merge(start_dataframe, stop_dataframe, how='left', left_on=[
+        'Subject', 'Behavior', 'Observation id', 'start_id', 'Modifier', 'Observation date', 'Observation duration'],
+        right_on=[
+            'Subject', 'Behavior', 'Observation id', 'stop_id', 'Modifier', 'Observation date', 'Observation duration'], 
+            suffixes=["_start", "_stop"])
+
+    merged_df.drop(columns=['start_id', 'stop_id',
+                   'Behavior type_start', 'Behavior type_stop'], inplace=True)
+
+    merged_df['Behaviour Duration (s)'] = merged_df[['Time_stop', 'Time_start']].apply(
+        lambda x: x['Time_stop'] - x['Time_start'], axis=1)
+
+    return merged_df 
 def run_pipeline(dfs: dict[str, pd.DataFrame]):
     data = concatenate_data_from_all_observations(dfs)
     data_by_subject = separate_data_by_subject(data)
