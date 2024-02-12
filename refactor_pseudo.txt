@@ -1,0 +1,17 @@
+for each csv file
+    read each line
+    group lines by subject
+    for each subject
+        construct timeline with behaviors
+        sort behaviors by start time
+        initialize bout counter to 0
+        initialize end time of previous behavior to -1
+        for each behavior in behaviors
+            if start time of behavior >= end time of previous behavior + 10 seconds
+                increment bout counter
+            add bout counter to behavior
+            update end time of previous behavior
+        extract behaviors, areas, bout length, behavior duration, bout
+        run statistics on these behaviors 
+        save information to dictionary-type structure
+output csv files
