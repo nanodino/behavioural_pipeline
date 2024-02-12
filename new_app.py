@@ -44,6 +44,11 @@ def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> pd.DataFrame:
     return df
 
 def get_bouts(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    This function creates an interval tree,
+    so that multiple overlapping behaviours 
+    can be considered part of the same bout.
+    '''
     df = df.sort_values(['Time'], ascending=[True])
     df = match_start_and_stop_for_behaviour(df)
     tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
