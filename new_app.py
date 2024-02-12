@@ -28,11 +28,6 @@ def import_input_files() ->  dict[str, pd.DataFrame]:
 
     return input_data_tables_dict
 
-def concatenate_data_from_all_observations(input_data_tables_dict) -> pd.DataFrame:
-    print('Concatenating data from all observations')
-    data = pd.concat(input_data_tables_dict.values(), ignore_index=True)
-    return data
-
 def separate_data_by_subject(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
     print('Separating data by subject')
     data_by_subject = {}
@@ -49,22 +44,15 @@ def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> pd.DataFrame:
     return df
 
 def get_bouts(df: pd.DataFrame) -> pd.DataFrame:
-    # Assuming 'Observation Date' and 'Time' columns exist in the dataframe
-    df['Observation date'] = pd.to_datetime(df['Observation date'])
-    df = df.sort_values(['Observation date', 'Time'], ascending=[True, True])
+    df = df.sort_values(['Time'], ascending=[True])
     df = match_start_and_stop_for_behaviour(df)
-     # Create an interval tree from the start and stop times
     tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
 
-    # Merge overlapping intervals
     tree.merge_overlaps()
-    # Create a new dataframe for the intervals
     intervals_df = pd.DataFrame([(interval.begin, interval.end, i+1) for i, interval in enumerate(tree)], columns=['Time_start', 'Time_stop', 'Interval_id'])
-    # Initialize a new column 'Interval_id' in the original dataframe
     df['Interval_id'] = np.nan
     st.dataframe(intervals_df)  # for demo purposes
 
-    # Assign the 'Interval_id' to each row in the original dataframe where the 'Time' falls within the 'Time_start' and 'Time_stop' of the intervals dataframe
     for i, row in df.iterrows():
         for j, interval_row in intervals_df.iterrows():
             if interval_row['Time_start'] <= row['Time_start'] <= interval_row['Time_stop']:
@@ -99,12 +87,13 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     return merged_df 
 
 def run_pipeline(dfs: dict[str, pd.DataFrame]):
-    data = concatenate_data_from_all_observations(dfs)
-    data_by_subject = separate_data_by_subject(data)
-    for subject, df in data_by_subject.items():
-        data_by_subject[subject] = get_behaviour_modifiers(df, 'Behavior')
-        data_by_subject[subject] = get_bouts(data_by_subject[subject])
-        st.dataframe(data_by_subject[subject])         # for demo purposes
+    for file, data in dfs.items():
+        st.write(f'Running pipeline for file {file}')
+        data_by_subject = separate_data_by_subject(data)
+        for subject, df in data_by_subject.items():
+            data_by_subject[subject] = get_behaviour_modifiers(df, 'Behavior')
+            data_by_subject[subject] = get_bouts(data_by_subject[subject])
+            st.dataframe(data_by_subject[subject])         # for demo purposes
 
 def main():
     st.title("Behavioural analysis pipeline")
