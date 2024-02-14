@@ -1,6 +1,8 @@
 # behavioural_pipeline
 A script to clean behavioural observation data
-LAST RELEASE: January 29th 2024
+
+LAST RELEASE: February 13th 2024
+
 EXPECTED RELEASE: February 29th 2024
 
 ## How to Use
