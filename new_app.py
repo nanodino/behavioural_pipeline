@@ -65,7 +65,24 @@ def get_bouts(df: pd.DataFrame) -> pd.DataFrame:
                 break
 
     return df
-    
+
+def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
+    # TODO: figure out how to present this 
+    pass
+
+def get_column_names_for_summary_table(name: str) -> str:
+    pass
+
+def get_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
+    pass
+
+def get_total_stereotyping_duration(df: pd.DataFrame) -> pd.DataFrame:
+    pass
+
+def write_to_excel(df: pd.DataFrame) -> None:
+    pass
+
+
 def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     start_dataframe = df[df['Behavior type'] == 'START']
     stop_dataframe = df[df['Behavior type'] == 'STOP']
