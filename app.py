@@ -3,6 +3,7 @@ import backend as be
 
 def main():
     st.title("Behavioural analysis pipeline")
+    st.divider()
     st.header("Welcome to the behavioural analysis pipeline!")
     st.write("This pipeline takes in .tsv files and outputs an excel file with behavioural analysis data and statistics.")
     st.write("Please upload your data files below.")
