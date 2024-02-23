@@ -25,19 +25,33 @@ def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> pd.DataFrame:
 
     return df
 
-def get_bouts(df: pd.DataFrame) -> pd.DataFrame:
+def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
     '''
     This function creates an interval tree,
     so that multiple overlapping behaviours 
     can be considered part of the same bout.
+    Bouts are merged if the time between them 
+    is shorter than the gap, in seconds.
     '''
     df = df.sort_values(['Time'], ascending=[True])
     df = match_start_and_stop_for_behaviour(df)
-    tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
+    raw_tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
 
-    tree.merge_overlaps()
-    sorted_tree = sorted(tree, key=lambda x: x.begin)
-    intervals_df = pd.DataFrame([(interval.begin, interval.end, i+1) for i, interval in enumerate(sorted_tree)], columns=['Time_start', 'Time_stop', 'bout_id'])
+    raw_tree.merge_overlaps()
+    intervals = [(i.begin, i.end) for i in raw_tree]
+    intervals.sort(key=lambda x: x[0]) #i.begin
+
+    merged = [intervals[0]]
+    for current in intervals:
+        previous = merged[-1]
+        if current[0] - previous[1] <= gap:
+            merged[-1] = (previous[0], max(previous[1], current[1]))
+        else:
+            merged.append(current)
+
+    merged_tree = IntervalTree(Interval(start, stop, i+1) for i, (start, stop) in enumerate(merged))
+
+    intervals_df = pd.DataFrame([(interval.begin, interval.end, interval.data) for interval in merged_tree], columns=['Time_start', 'Time_stop', 'bout_id'])
     df['bout_id'] = np.nan
 
     for i, row in df.iterrows():
@@ -110,5 +124,5 @@ def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
 
 def run_pipeline(subject, df):
     data_by_subject = get_behaviour_modifiers(df, 'Behavior')
-    data_by_subject = get_bouts(data_by_subject)
+    data_by_subject = get_bouts(data_by_subject, 10)
     return data_by_subject
