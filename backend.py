@@ -51,7 +51,8 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
 
     merged_tree = IntervalTree(Interval(start, stop, i+1) for i, (start, stop) in enumerate(merged))
 
-    intervals_df = pd.DataFrame([(interval.begin, interval.end, interval.data) for interval in merged_tree], columns=['Time_start', 'Time_stop', 'bout_id'])
+    intervals_df = pd.DataFrame([(interval.begin, interval.end, interval.data) for interval in merged_tree], 
+                                columns=['Time_start', 'Time_stop', 'bout_id'])
     df['bout_id'] = np.nan
 
     for i, row in df.iterrows():
@@ -109,7 +110,8 @@ def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
     input_data_tables_dict= {}
     columns_of_interest = ['Observation id',
                            'Subject', 'Behavior',
-                           'Behavior type', 'Time', 'Observation date', 'Observation duration']
+                           'Behavior type', 'Time', 
+                           'Observation date', 'Observation duration']
     if data_files is not None:
         for file in data_files:
             file.seek(0)
