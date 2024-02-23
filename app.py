@@ -4,7 +4,7 @@ import backend as be
 
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", layout="wide", initial_sidebar_state="auto", 
-                       menu_items={"Last deployment": f'{datetime.datetime.now()}'})
+                       menu_items={"About": f'Last deployed on {datetime.datetime.now().strftime("%d/%m/%Y at %H:%M:%S")}'})
     st.title("Behavioural analysis pipeline")
     st.divider()
     st.header("Welcome to the behavioural analysis pipeline!")
