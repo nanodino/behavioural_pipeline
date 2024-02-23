@@ -8,7 +8,7 @@ This program was designed to take in data from a particular set of behavioural o
 
 Multiple files can be analyzed at once. Each file is processed differently to simplify the creation of intervals to find overlapping behaviours.
 
-URL: http://18.117.7.227:8501/   <--- this is updated every hour
+URL: http://18.117.7.227:8501/ 
 
 tmux is magic
 
