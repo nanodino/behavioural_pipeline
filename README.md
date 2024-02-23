@@ -1,7 +1,7 @@
 # behavioural_pipeline
 A script to clean behavioural observation data
 
-Latest release: 13th February 2024
+Last Updated: 23rd February 2024
 
 ## Usage (of the program)
 This program was designed to take in data from a particular set of behavioural observations.
