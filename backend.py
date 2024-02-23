@@ -36,7 +36,8 @@ def get_bouts(df: pd.DataFrame) -> pd.DataFrame:
     tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
 
     tree.merge_overlaps()
-    intervals_df = pd.DataFrame([(interval.begin, interval.end, i+1) for i, interval in enumerate(tree)], columns=['Time_start', 'Time_stop', 'bout_id'])
+    sorted_tree = sorted(tree, key=lambda x: x.begin)
+    intervals_df = pd.DataFrame([(interval.begin, interval.end, i+1) for i, interval in enumerate(sorted_tree)], columns=['Time_start', 'Time_stop', 'bout_id'])
     df['bout_id'] = np.nan
 
     for i, row in df.iterrows():
