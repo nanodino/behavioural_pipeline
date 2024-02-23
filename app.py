@@ -1,7 +1,10 @@
+import datetime
 import streamlit as st
 import backend as be
 
 def main():
+    st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", layout="wide", initial_sidebar_state="auto", 
+                       menu_items={"Last deployment": f'{datetime.datetime.now()}'})
     st.title("Behavioural analysis pipeline")
     st.divider()
     st.header("Welcome to the behavioural analysis pipeline!")
