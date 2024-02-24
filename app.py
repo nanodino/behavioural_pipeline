@@ -3,8 +3,21 @@ import streamlit as st
 import backend as be
 import pandas as pd
 
+titles = ['Data', 'Stats', 'Proportion of time doing each behaviour in each area']
+
+def run_and_concatenate(subjects, dfs):
+    all_results = [[], [], []]
+    for subject, data in subjects.items():
+        results = be.run_pipeline(subject, data)
+        for i in range(3):
+            all_results[i].append(results[i])
+
+    all_data = [pd.concat(results) for results in all_results]
+    return all_data
+
+
 def main():
-    st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", layout="wide", initial_sidebar_state="auto", 
+    st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
                        menu_items={"About": f'Last deployed on {datetime.datetime.now().strftime("%d/%m/%Y at %H:%M:%S UTC")}'})
     st.title("Behavioural analysis pipeline")
     st.divider()
@@ -23,23 +36,14 @@ def main():
         selected_subject = st.selectbox('Select a subject to run the pipeline for', subject_list)
 
         if selected_subject in all_subjects:
-            all_results = []
-            for file, data in dfs.items():
-                data_by_subject = be.separate_data_by_subject(data)
-                if selected_subject in data_by_subject:
-                    result = be.run_pipeline(selected_subject, data_by_subject[selected_subject])
-                    all_results.append(result)
-
-            all_data = pd.concat(all_results)
-            st.dataframe(all_data)
+            subjects = {selected_subject: all_subjects[selected_subject] for file, data in dfs.items()}
+            all_data = run_and_concatenate(subjects, dfs)
         elif selected_subject == 'All Subjects':
-            all_results = []
-            for subject, data in all_subjects.items():
-                result = be.run_pipeline(subject, data)
-                all_results.append(result)
+            all_data = run_and_concatenate(all_subjects, dfs)
 
-            all_data = pd.concat(all_results)
-            st.dataframe(all_data)
+        for title, data in zip(titles, all_data):
+            st.subheader(title)
+            st.dataframe(data)
 
 
 if __name__ == "__main__":
