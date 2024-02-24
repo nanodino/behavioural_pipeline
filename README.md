@@ -1,9 +1,9 @@
 # behavioural_pipeline
 A script to clean behavioural observation data
 
-Last Updated: 23rd February 2024
+Last Updated: 24th February 2024
 
-## Usage (of the program)
+## Usage 
 This program was designed to take in data from a particular set of behavioural observations.
 
 Multiple files can be analyzed at once. Each file is processed differently to simplify the creation of intervals to find overlapping behaviours.
