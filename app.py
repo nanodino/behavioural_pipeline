@@ -9,8 +9,7 @@ def main():
     st.title("Behavioural analysis pipeline")
     st.divider()
     st.header("Welcome to the behavioural analysis pipeline!")
-    st.write("This pipeline takes in .tsv files and outputs an excel file with behavioural analysis data and statistics.")
-    st.write("Please upload your data files below.")
+    st.write("This pipeline takes in .csv or .tsv files and outputs an excel file with behavioural analysis data and statistics.")
     data_files = st.file_uploader("Upload your data files", type=['csv', 'tsv'], accept_multiple_files=True)
     dfs = be.import_input_files(data_files)
     if dfs:
