@@ -64,14 +64,40 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
     return df
 
 def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
-    # TODO: figure out how to present this 
-    pass
+    basic_stats = df.groupby(['Subject', 'Behavior', 'Modifier']).agg({'Observation id': ['count'],
+                                                                       'Behaviour Duration (s)': ['sum', 'mean', 'var', 'std']})
+    basic_stats.columns = basic_stats.columns.map('_'.join)
+    basic_stats.reset_index(inplace=True)
+    # make a column for each behaviour-modifier pair
+    basic_stats['behaviour_modifier'] = basic_stats[['Behavior', 'Modifier']].apply(
+        lambda x: f'{x["Behavior"]}_{x["Modifier"]}', axis=1)
+    basic_stats.drop(columns=['Behavior', 'Modifier'], inplace=True)
+    basic_stats.set_index('Subject', inplace=True)
+    basic_stats = basic_stats.pivot(columns='behaviour_modifier')
+    basic_stats.columns = basic_stats.columns.map('_'.join)
+    basic_stats.reset_index(inplace=True)
+    basic_stats.fillna(0, inplace=True)
+    basic_stats.set_index('Subject', inplace=True)
+    return basic_stats
+
 
 def get_column_names_for_summary_table(name: str) -> str:
     pass
 
 def get_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
-    pass
+    time_df = df.groupby(['Subject', 'Behavior', 'Modifier'])[
+        'Behaviour Duration (s)'].agg('sum')
+    time_df = time_df.reset_index()
+    time_df.rename(columns={'Behaviour Duration (s)': 'total time'}, inplace=True)
+    # pivot to get the total time for each behaviour and the proportion of time spent doing each modifier
+    pivot_df = time_df.pivot_table(index=['Subject', 'Behavior'], columns=[
+        'Modifier'], values='total time', aggfunc='sum')
+    pivot_df = pivot_df.div(pivot_df.sum(axis=1), axis=0)
+    pivot_df = pivot_df.reset_index()
+    pivot_df.fillna(0, inplace=True)
+    pivot_df.set_index('Subject', inplace=True)
+
+    return pivot_df
 
 def get_total_stereotyping_duration(df: pd.DataFrame) -> pd.DataFrame:
     pass
@@ -127,4 +153,6 @@ def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
 def run_pipeline(subject, df):
     data_by_subject = get_behaviour_modifiers(df, 'Behavior')
     data_by_subject = get_bouts(data_by_subject, 10)
-    return data_by_subject
+    stats_by_subject = get_behaviour_data_for_each_subject(data_by_subject)
+    summary_df =  get_time_doing_behaviour(data_by_subject)
+    return data_by_subject, stats_by_subject, summary_df
