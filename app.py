@@ -43,6 +43,7 @@ def main():
 
         for title, data in zip(titles, all_data):
             data.fillna(0, inplace=True)
+            data.sort_index(axis=1, inplace=True)
             st.subheader(title)
             st.dataframe(data)
 
