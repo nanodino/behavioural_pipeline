@@ -2,13 +2,6 @@ import pandas as pd
 from intervaltree import Interval, IntervalTree
 import numpy as np
 
-BR_AREAS = ['A', 'B', 'C', 'D']
-RT_AREAS = ['H', 'I', 'J']
-TWRL_AREAS = ['A', 'D']
-BKFL_AREAS = ['E', 'F']
-LIRDRT_AREAS = ['A', 'D']
-
-
 def separate_data_by_subject(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
     print('Separating data by subject')
     data_by_subject = {}
