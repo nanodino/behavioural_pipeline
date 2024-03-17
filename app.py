@@ -42,6 +42,7 @@ def main():
             all_data = run_and_concatenate(all_subjects, dfs)
 
         for title, data in zip(titles, all_data):
+            data.fillna(0, inplace=True)
             st.subheader(title)
             st.dataframe(data)
 
