@@ -54,6 +54,8 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
                 df.at[i, 'bout_id'] = interval_row['bout_id']
                 break
 
+    df = identify_mixed_bouts(df)
+
     return df
 
 def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
@@ -73,6 +75,10 @@ def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
     basic_stats.set_index('Subject', inplace=True)
     return basic_stats
 
+def identify_mixed_bouts(df: pd.DataFrame) -> pd.DataFrame:
+    bout_behavior_counts = df.groupby('bout_id')['Behavior'].nunique()
+    df['mixed_bout'] = df['bout_id'].map(bout_behavior_counts > 1)
+    return df
 
 def get_column_names_for_summary_table(name: str) -> str:
     pass
