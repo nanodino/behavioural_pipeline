@@ -15,7 +15,6 @@ def run_and_concatenate(subjects, dfs):
     all_data = [pd.concat(results) for results in all_results]
     return all_data
 
-
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
                        menu_items={"About": f'Last deployed on {datetime.datetime.now().strftime("%d/%m/%Y at %H:%M:%S UTC")}'})
