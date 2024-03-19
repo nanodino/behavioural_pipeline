@@ -80,6 +80,22 @@ def identify_mixed_bouts(df: pd.DataFrame) -> pd.DataFrame:
     df['mixed_bout'] = df['bout_id'].map(bout_behavior_counts > 1)
     return df
 
+def generate_bouts_df(df: pd.DataFrame) -> pd.DataFrame:
+    # generate a dataframe with the total time for each bout
+    bouts_df = df.groupby(['Subject', 'bout_id', 'mixed_bout'])[
+        'Behaviour Duration (s)'].agg('sum')
+    bouts_df = bouts_df.reset_index()
+    bouts_df.set_index('Subject', inplace=True)
+    return bouts_df
+
+def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
+    df.rename(columns={'Behaviour Duration (s)': 'Bout Duration (s)'}, inplace=True)
+    bout_stats = df.groupby(['mixed_bout', 'Subject'])['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
+    bout_stats.columns = bout_stats.columns.map(''.join)
+    bout_stats.reset_index(inplace=True)
+    bout_stats.set_index('mixed_bout', inplace=True)
+    return bout_stats
+
 def get_column_names_for_summary_table(name: str) -> str:
     pass
 
@@ -153,5 +169,7 @@ def run_pipeline(subject, df):
     data_by_subject = get_behaviour_modifiers(df, 'Behavior')
     data_by_subject = get_bouts(data_by_subject, 10)
     stats_by_subject = get_behaviour_data_for_each_subject(data_by_subject)
+    bouts_data = generate_bouts_df(data_by_subject)
+    bout_stats = calculate_bout_stats(bouts_data)
     summary_df =  get_time_doing_behaviour(data_by_subject)
-    return data_by_subject, stats_by_subject, summary_df
+    return data_by_subject, stats_by_subject, bouts_data, bout_stats, summary_df

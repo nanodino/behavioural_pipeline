@@ -3,17 +3,17 @@ import streamlit as st
 import backend as be
 import pandas as pd
 
-titles = ['Data', 'Stats', 'Proportion of time doing each behaviour in each area']
+titles = ['Data', 'Behaviour Stats', 'Bouts', 'Bout Stats', 'Proportion of time doing each behaviour in each area']
 
 def run_and_concatenate(subjects, dfs):
-    all_results = [[], [], []]
+    all_results = [[], [], [], []]
     for subject, data in subjects.items():
         results = be.run_pipeline(subject, data)
-        for i in range(3):
+        for i in range(4):
             all_results[i].append(results[i])
 
-    all_data = [pd.concat(results) for results in all_results]
-    return all_data
+    concat_data = [pd.concat(results) for results in all_results]
+    return concat_data
 
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
