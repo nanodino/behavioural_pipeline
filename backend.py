@@ -26,37 +26,45 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
     Bouts are merged if the time between them 
     is shorter than the gap, in seconds.
     '''
-    df = df.sort_values(['Time'], ascending=[True])
-    df = match_start_and_stop_for_behaviour(df)
-    raw_tree = IntervalTree(Interval(start, stop) for start, stop in zip(df['Time_start'], df['Time_stop']))
+    observation_dates = df['Observation date'].unique()
+    all_bouts = pd.DataFrame()
+    bout_id = 1
 
-    raw_tree.merge_overlaps()
-    intervals = [(i.begin, i.end) for i in raw_tree]
-    intervals.sort(key=lambda x: x[0]) #i.begin
+    for date in observation_dates:
+        df_date = df[df['Observation date'] == date]
+        df_date = df_date.sort_values(['Time'], ascending=[True])
+        df_date = match_start_and_stop_for_behaviour(df_date)
+        raw_tree = IntervalTree(Interval(start, stop) for start, stop in zip(df_date['Time_start'], df_date['Time_stop']))
 
-    merged = [intervals[0]]
-    for current in intervals:
-        previous = merged[-1]
-        if current[0] - previous[1] <= gap:
-            merged[-1] = (previous[0], max(previous[1], current[1]))
-        else:
-            merged.append(current)
+        raw_tree.merge_overlaps()
+        intervals = [(i.begin, i.end) for i in raw_tree]
+        intervals.sort(key=lambda x: x[0]) #i.begin
 
-    merged_tree = IntervalTree(Interval(start, stop, i+1) for i, (start, stop) in enumerate(merged))
+        merged = [intervals[0]]
+        for current in intervals:
+            previous = merged[-1]
+            if current[0] - previous[1] <= gap:
+                merged[-1] = (previous[0], max(previous[1], current[1]))
+            else:
+                merged.append(current)
 
-    intervals_df = pd.DataFrame([(interval.begin, interval.end, interval.data) for interval in merged_tree], 
-                                columns=['Time_start', 'Time_stop', 'bout_id'])
-    df['bout_id'] = np.nan
+        merged_tree = IntervalTree(Interval(start, stop, bout_id + i) for i, (start, stop) in enumerate(merged))
 
-    for i, row in df.iterrows():
-        for j, interval_row in intervals_df.iterrows():
-            if interval_row['Time_start'] <= row['Time_start'] <= interval_row['Time_stop']:
-                df.at[i, 'bout_id'] = interval_row['bout_id']
-                break
+        intervals_df = pd.DataFrame([(interval.begin, interval.end, interval.data) for interval in merged_tree], 
+                                    columns=['Time_start', 'Time_stop', 'bout_id'])
+        df_date['bout_id'] = np.nan
 
-    df = identify_mixed_bouts(df)
+        for i, row in df_date.iterrows():
+            for j, interval_row in intervals_df.iterrows():
+                if interval_row['Time_start'] <= row['Time_start'] <= interval_row['Time_stop']:
+                    df_date.at[i, 'bout_id'] = interval_row['bout_id']
+                    break
 
-    return df
+        df_date = identify_mixed_bouts(df_date)
+        bout_id = df_date['bout_id'].max() + 1
+        all_bouts = pd.concat([all_bouts, df_date])
+
+    return all_bouts
 
 def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
     basic_stats = df.groupby(['Subject', 'Behavior', 'Modifier']).agg({'Observation id': ['count'],
