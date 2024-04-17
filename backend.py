@@ -166,10 +166,19 @@ def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
 
 
 def run_pipeline(subject, df):
+    all_data_by_subject, all_stats_by_subject, all_bouts_data, all_bout_stats, all_summary_df = [], [], [], [], []
+
     data_by_subject = get_behaviour_modifiers(df, 'Behavior')
     data_by_subject = get_bouts(data_by_subject, 10)
     stats_by_subject = get_behaviour_data_for_each_subject(data_by_subject)
     bouts_data = generate_bouts_df(data_by_subject)
     bout_stats = calculate_bout_stats(bouts_data)
     summary_df =  get_time_doing_behaviour(data_by_subject)
-    return data_by_subject, stats_by_subject, bouts_data, bout_stats, summary_df
+        
+    all_data_by_subject.append(data_by_subject)
+    all_stats_by_subject.append(stats_by_subject)
+    all_bouts_data.append(bouts_data)
+    all_bout_stats.append(bout_stats)
+    all_summary_df.append(summary_df)
+
+    return all_data_by_subject, all_stats_by_subject, all_bouts_data, all_bout_stats, all_summary_df
