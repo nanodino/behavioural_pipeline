@@ -6,12 +6,8 @@ import pandas as pd
 titles = ['Data', 'Behaviour Stats', 'Bouts', 'Bout Stats', 'Proportion of time doing each behaviour in each area']
 
 def run_and_concatenate(dfs):
-    all_results = [[], [], [], []]
-    for file, data in dfs.items():
-        results = be.run_pipeline(file, data)
-        for i in range(4):
-            all_results[i].append(results[i])
-    return [pd.concat(results) for results in all_results]
+    all_data = pd.concat(dfs.values())
+    return be.run_pipeline(all_data)
 
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
