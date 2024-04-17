@@ -165,11 +165,24 @@ def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
     return input_data_tables_dict
 
 
-def run_pipeline(subject, df):
-    data_by_subject = get_behaviour_modifiers(df, 'Behavior')
-    data_by_subject = get_bouts(data_by_subject, 10)
-    stats_by_subject = get_behaviour_data_for_each_subject(data_by_subject)
-    bouts_data = generate_bouts_df(data_by_subject)
-    bout_stats = calculate_bout_stats(bouts_data)
-    summary_df =  get_time_doing_behaviour(data_by_subject)
-    return data_by_subject, stats_by_subject, bouts_data, bout_stats, summary_df
+def run_pipeline(df):
+
+    data_by_subject = separate_data_by_subject(df)
+    results = {}
+    for subject in data_by_subject:
+        subject_data = get_behaviour_modifiers(data_by_subject[subject], 'Behavior')
+        subject_data = get_bouts(subject_data, 10)
+        stats = get_behaviour_data_for_each_subject(subject_data)
+        bouts_data = generate_bouts_df(subject_data)
+        bout_stats = calculate_bout_stats(bouts_data)
+        summary_df =  get_time_doing_behaviour(subject_data)
+
+        results[subject] = {
+            'data': subject_data,
+            'stats': stats,
+            'bouts_data': bouts_data,
+            'bout_stats': bout_stats,
+            'summary_df': summary_df
+        }
+
+    return results

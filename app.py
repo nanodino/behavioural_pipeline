@@ -22,10 +22,14 @@ def main():
     if dfs:
         all_data = run_and_concatenate(dfs)
 
-        for title, data in zip(titles, all_data):
+        subjects = list(all_data.keys())
+        selected_subject = st.selectbox('Select a subject', subjects)
+        results = all_data[selected_subject]
+
+        for title, data in results.items():
             data.fillna(0, inplace=True)
             data.sort_index(axis=1, inplace=True)
-            st.subheader(title)
+            st.subheader(title.title().replace('_', ' '))
             st.dataframe(data)
 
 if __name__ == "__main__":
