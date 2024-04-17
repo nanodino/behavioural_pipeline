@@ -23,14 +23,29 @@ def main():
         all_data = run_and_concatenate(dfs)
 
         subjects = list(all_data.keys())
+        subjects.insert(0, "All Subjects")
         selected_subject = st.selectbox('Select a subject', subjects)
-        results = all_data[selected_subject]
 
-        for title, data in results.items():
-            data.fillna(0, inplace=True)
-            data.sort_index(axis=1, inplace=True)
-            st.subheader(title.title().replace('_', ' '))
-            st.dataframe(data)
+        if selected_subject == "All Subjects":
+            for title in ['data', 'stats', 'bouts_data', 'bout_stats', 'summary_df']:
+                all_dfs = []
+                for subject, results in all_data.items():
+                    data = results[title]
+                    data['Subject'] = subject
+                    data.sort_index(axis=1, inplace=True)
+                    all_dfs.append(data)
+
+                all_data_df = pd.concat(all_dfs)
+                all_data_df.fillna(0, inplace=True)
+                st.subheader(title.title().replace('_', ' '))
+                st.dataframe(all_data_df)
+        else:
+            results = all_data[selected_subject]
+            for title, data in results.items():
+                data.fillna(0, inplace=True)
+                data.sort_index(axis=1, inplace=True)
+                st.subheader(title.title().replace('_', ' '))
+                st.dataframe(data)
 
 if __name__ == "__main__":
     main()
