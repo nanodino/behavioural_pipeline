@@ -110,7 +110,9 @@ def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     
     bout_stats = pd.concat([bout_stats, all_bout_stats], ignore_index=True)
     bout_stats.set_index(['mixed_bout', 'Subject'], inplace=True)
-    
+    bout_stats = bout_stats.reset_index('Subject', drop=True)
+
+
     return bout_stats
 
 def get_column_names_for_summary_table(name: str) -> str:
