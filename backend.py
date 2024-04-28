@@ -98,10 +98,19 @@ def generate_bouts_df(df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     df.rename(columns={'Behaviour Duration (s)': 'Bout Duration (s)'}, inplace=True)
+    df['mixed_bout'] = df['mixed_bout'].astype(str) #avoids mixed types
     bout_stats = df.groupby(['mixed_bout', 'Subject'])['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
     bout_stats.columns = bout_stats.columns.map(''.join)
     bout_stats.reset_index(inplace=True)
-    bout_stats.set_index('mixed_bout', inplace=True)
+    
+    all_bout_stats = df.groupby('Subject')['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
+    all_bout_stats.columns = all_bout_stats.columns.map(''.join)
+    all_bout_stats.reset_index(inplace=True)
+    all_bout_stats['mixed_bout'] = 'All'
+    
+    bout_stats = pd.concat([bout_stats, all_bout_stats], ignore_index=True)
+    bout_stats.set_index(['mixed_bout', 'Subject'], inplace=True)
+    
     return bout_stats
 
 def get_column_names_for_summary_table(name: str) -> str:
