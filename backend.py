@@ -98,11 +98,23 @@ def generate_bouts_df(df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     df.rename(columns={'Behaviour Duration (s)': 'Bout Duration (s)'}, inplace=True)
+    df['mixed_bout'] = df['mixed_bout'].astype(str).replace({'True': 'Mixed', 'False': 'Non-mixed'})
+    
     bout_stats = df.groupby(['mixed_bout', 'Subject'])['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
     bout_stats.columns = bout_stats.columns.map(''.join)
     bout_stats.reset_index(inplace=True)
-    bout_stats.set_index('mixed_bout', inplace=True)
-    return bout_stats
+    
+    all_bout_stats = df.groupby('Subject')['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
+    all_bout_stats.columns = all_bout_stats.columns.map(''.join)
+    all_bout_stats.reset_index(inplace=True)
+    all_bout_stats['mixed_bout'] = 'All'
+    
+    bout_stats = pd.concat([bout_stats, all_bout_stats], ignore_index=True)
+    bout_stats_melt = bout_stats.melt(id_vars=['Subject', 'mixed_bout'], var_name='Stat')
+    bout_stats_pivot = bout_stats_melt.pivot_table(index='Subject', columns=['mixed_bout', 'Stat'], values='value')
+    bout_stats_pivot.columns = ['_'.join(col).lower() for col in bout_stats_pivot.columns]
+    
+    return bout_stats_pivot
 
 def get_column_names_for_summary_table(name: str) -> str:
     pass
