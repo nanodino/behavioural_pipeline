@@ -163,6 +163,10 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
 
     merged_df['Behaviour Duration (s)'] = merged_df[['Time_stop', 'Time_start']].apply(
         lambda x: x['Time_stop'] - x['Time_start'], axis=1)
+    # I don't like hardcoding this, but it will have to do for now
+    # TODO: make this a parameter
+    # TODO: rearchitect things so this function is not multiple functions deep 
+    merged_df = merged_df[merged_df['Behaviour Duration (s)'] >= 3]
 
     return merged_df 
 
