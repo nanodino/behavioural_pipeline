@@ -3,7 +3,7 @@ import streamlit as st
 import backend as be
 import pandas as pd
 
-titles = ['Data', 'Behaviour Stats', 'Bouts', 'Bout Stats', 'Proportion of time doing each behaviour in each area']
+titles = ['Data', 'Behaviour Stats', 'Bouts', 'Bout Stats', 'Location Stats']
 
 def run_and_concatenate(dfs):
     all_data = pd.concat(dfs.values())
