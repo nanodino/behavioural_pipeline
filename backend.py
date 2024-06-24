@@ -206,7 +206,7 @@ def run_pipeline(df):
             'stats': stats,
             'bouts_data': bouts_data,
             'bout_stats': bout_stats,
-            'summary_df': summary_df
+            'location_stats': summary_df
         }
 
     return results
