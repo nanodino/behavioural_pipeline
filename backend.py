@@ -202,11 +202,11 @@ def run_pipeline(df):
         summary_df =  get_time_doing_behaviour(subject_data)
 
         results[subject] = {
-            'data': subject_data,
-            'stats': stats,
+            'raw_behavioural_data': subject_data,
+            'statistics': stats,
             'bouts_data': bouts_data,
-            'bout_stats': bout_stats,
-            'location_stats': summary_df
+            'bout_statistics': bout_stats,
+            'location_statistics': summary_df
         }
 
     return results
