@@ -27,7 +27,7 @@ def main():
         selected_subject = st.selectbox('Select a subject', subjects)
 
         if selected_subject == "All Subjects":
-            for title in ['data', 'stats', 'bouts_data', 'bout_stats', 'location_stats']:
+            for title in ['raw_behavioural_data', 'statistics', 'bouts_data', 'bout_statistics', 'location_statistics']:
                 all_dfs = []
                 for subject, results in all_data.items():
                     data = results[title]
