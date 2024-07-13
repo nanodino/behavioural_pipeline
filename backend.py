@@ -81,6 +81,7 @@ def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
     basic_stats.reset_index(inplace=True)
     basic_stats.fillna(0, inplace=True)
     basic_stats.set_index('Subject', inplace=True)
+
     return basic_stats
 
 def identify_mixed_bouts(df: pd.DataFrame) -> pd.DataFrame:
@@ -132,6 +133,7 @@ def get_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     pivot_df.fillna(0, inplace=True)
     pivot_df.set_index('Subject', inplace=True)
 
+
     return pivot_df
 
 def get_total_stereotyping_duration(df: pd.DataFrame) -> pd.DataFrame:
@@ -166,7 +168,15 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     # I don't like hardcoding this, but it will have to do for now
     # TODO: make this a parameter
     # TODO: rearchitect things so this function is not multiple functions deep 
-    merged_df = merged_df[merged_df['Behaviour Duration (s)'] >= 3]
+    # note these two are not related, they just both happen to be 3
+    std_deviation_multiplier = 3
+    min_duration = 3
+    merged_df = merged_df[merged_df['Behaviour Duration (s)'] >= min_duration]
+    mean = merged_df['Behaviour Duration (s)'].mean()
+    std_dev = merged_df['Behaviour Duration (s)'].std()
+    lower_bound = mean - std_deviation_multiplier * std_dev
+    upper_bound = mean + std_deviation_multiplier * std_dev
+    df = merged_df.loc[(merged_df['Behaviour Duration (s)'] >= lower_bound) & (merged_df['Behaviour Duration (s)'] <= upper_bound)]
 
     return merged_df 
 
