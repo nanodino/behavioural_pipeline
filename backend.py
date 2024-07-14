@@ -10,7 +10,7 @@ def separate_data_by_subject(data: pd.DataFrame) -> dict[str, pd.DataFrame]:
     return data_by_subject
 
 
-def get_behaviour_modifiers(df: pd.DataFrame, behaviour: str) -> pd.DataFrame:
+def get_behaviour_modifiers(df: pd.DataFrame) -> pd.DataFrame:
     df['Modifier'] = df[['Behavior']].apply(
         lambda x: x['Behavior'].split("_", 1)[1] if len(x['Behavior'].split('_')) > 1 else '', axis=1)
     df['Behavior'] = df[['Behavior']].apply(lambda x: x['Behavior'].split(
@@ -117,9 +117,6 @@ def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     
     return bout_stats_pivot
 
-def get_column_names_for_summary_table(name: str) -> str:
-    pass
-
 def get_time_doing_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     time_df = df.groupby(['Subject', 'Behavior', 'Modifier'])[
         'Behaviour Duration (s)'].agg('sum')
@@ -204,7 +201,7 @@ def run_pipeline(df):
     data_by_subject = separate_data_by_subject(df)
     results = {}
     for subject in data_by_subject:
-        subject_data = get_behaviour_modifiers(data_by_subject[subject], 'Behavior')
+        subject_data = get_behaviour_modifiers(data_by_subject[subject])
         subject_data = get_bouts(subject_data, 10)
         stats = get_behaviour_data_for_each_subject(subject_data)
         bouts_data = generate_bouts_df(subject_data)
