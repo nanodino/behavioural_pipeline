@@ -33,7 +33,7 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
     for date in observation_dates:
         df_date = df[df['Observation date'] == date]
         df_date = df_date.sort_values(['Time'], ascending=[True])
-        df_date = match_start_and_stop_for_behaviour(df_date)
+        df_date, outliers = match_start_and_stop_for_behaviour(df_date)
         raw_tree = IntervalTree(Interval(start, stop) for start, stop in zip(df_date['Time_start'], df_date['Time_stop']))
 
         raw_tree.merge_overlaps()
@@ -64,7 +64,7 @@ def get_bouts(df: pd.DataFrame, gap: float) -> pd.DataFrame:
         bout_id = df_date['bout_id'].max() + 1
         all_bouts = pd.concat([all_bouts, df_date])
 
-    return all_bouts
+    return all_bouts, outliers
 
 def get_behaviour_data_for_each_subject(df: pd.DataFrame) -> pd.DataFrame:
     basic_stats = df.groupby(['Subject', 'Behavior', 'Modifier']).agg({'Observation id': ['count'],
@@ -173,9 +173,10 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     std_dev = merged_df['Behaviour Duration (s)'].std()
     lower_bound = mean - std_deviation_multiplier * std_dev
     upper_bound = mean + std_deviation_multiplier * std_dev
-    df = merged_df.loc[(merged_df['Behaviour Duration (s)'] >= lower_bound) & (merged_df['Behaviour Duration (s)'] <= upper_bound)]
+    df_without_outliers = merged_df.loc[(merged_df['Behaviour Duration (s)'] >= lower_bound) & (merged_df['Behaviour Duration (s)'] <= upper_bound)]
+    df_outliers = merged_df.loc[(merged_df['Behaviour Duration (s)'] < lower_bound) | (merged_df['Behaviour Duration (s)'] > upper_bound)]
 
-    return merged_df 
+    return df_without_outliers, df_outliers
 
 
 def import_input_files(data_files) ->  dict[str, pd.DataFrame]:
@@ -202,7 +203,7 @@ def run_pipeline(df):
     results = {}
     for subject in data_by_subject:
         subject_data = get_behaviour_modifiers(data_by_subject[subject])
-        subject_data = get_bouts(subject_data, 10)
+        subject_data, outliers = get_bouts(subject_data, 10)
         stats = get_behaviour_data_for_each_subject(subject_data)
         bouts_data = generate_bouts_df(subject_data)
         bout_stats = calculate_bout_stats(bouts_data)
@@ -213,7 +214,8 @@ def run_pipeline(df):
             'statistics': stats,
             'bouts_data': bouts_data,
             'bout_statistics': bout_stats,
-            'location_statistics': summary_df
+            'location_statistics': summary_df,
+            'outliers': outliers,
         }
 
     return results
