@@ -182,8 +182,6 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
 
         group_without_outliers = group.loc[(group['Behaviour Duration (s)'] >= lower_bound) & (group['Behaviour Duration (s)'] <= upper_bound)]
         group_outliers = group.loc[(group['Behaviour Duration (s)'] < lower_bound) | (group['Behaviour Duration (s)'] > upper_bound)]
-
-        # Add mean and std deviation to group_outliers
         group_outliers['mean'] = mean
         group_outliers['std_dev'] = std_dev
 
