@@ -54,6 +54,7 @@ class DataManager:
 
     def _get_single_subject_data(self, subject, data_type):
         data = self.data[subject][data_type]
+        data['Subject'] = subject
         data.fillna(0, inplace=True)
         data.sort_index(axis=1, inplace=True)
         return data
