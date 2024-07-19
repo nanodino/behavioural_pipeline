@@ -3,7 +3,6 @@ import streamlit as st
 import backend as be
 import pandas as pd
 
-# Define constants
 RAW_BEHAVIOURAL_DATA = 'raw_behavioural_data'
 STATISTICS = 'statistics'
 BOUTS_DATA = 'bouts_data'
@@ -74,12 +73,24 @@ class UIManager:
         if data_files:
             self.data_manager.load_data(data_files)
             subjects = self.data_manager.get_subjects()
-            selected_subject = st.selectbox('Select a subject', subjects)
+            selected_subjects = st.multiselect('Select one or more subjects', subjects)
 
-            for data_type in DATA_TYPES:
-                data = self.data_manager.get_data(selected_subject, data_type)
-                st.subheader(data_type.title().replace('_', ' '))
-                st.dataframe(data)
+            if selected_subjects: 
+                for data_type in DATA_TYPES:
+                    data_frames = []
+                    for selected_subject in selected_subjects:
+                        data = self.data_manager.get_data(selected_subject, data_type)
+                        data_frames.append(data)
+
+                    combined_data = pd.concat(data_frames, ignore_index=True)
+                    if 'Subject' in combined_data.columns:
+                        combined_data.set_index('Subject', inplace=True)
+                    else: 
+                        st.error('No subject column found in data. Please contact administrator')
+                    st.subheader(f"{data_type.title().replace('_', ' ')}")
+                    st.dataframe(combined_data)
+            else:
+                st.warning('No subjects selected. Select at least one subject to display data.')
 
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
