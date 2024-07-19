@@ -169,12 +169,27 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     std_deviation_multiplier = 3
     min_duration = 3
     merged_df = merged_df[merged_df['Behaviour Duration (s)'] >= min_duration]
-    mean = merged_df['Behaviour Duration (s)'].mean()
-    std_dev = merged_df['Behaviour Duration (s)'].std()
-    lower_bound = mean - std_deviation_multiplier * std_dev
-    upper_bound = mean + std_deviation_multiplier * std_dev
-    df_without_outliers = merged_df.loc[(merged_df['Behaviour Duration (s)'] >= lower_bound) & (merged_df['Behaviour Duration (s)'] <= upper_bound)]
-    df_outliers = merged_df.loc[(merged_df['Behaviour Duration (s)'] < lower_bound) | (merged_df['Behaviour Duration (s)'] > upper_bound)]
+    
+
+    df_without_outliers = pd.DataFrame()
+    df_outliers = pd.DataFrame()
+
+    for behavior, group in merged_df.groupby('Behavior'):
+        mean = group['Behaviour Duration (s)'].mean()
+        std_dev = group['Behaviour Duration (s)'].std()
+        lower_bound = mean - std_deviation_multiplier * std_dev
+        upper_bound = mean + std_deviation_multiplier * std_dev
+
+        group_without_outliers = group.loc[(group['Behaviour Duration (s)'] >= lower_bound) & (group['Behaviour Duration (s)'] <= upper_bound)]
+        group_outliers = group.loc[(group['Behaviour Duration (s)'] < lower_bound) | (group['Behaviour Duration (s)'] > upper_bound)]
+
+        # Add mean and std deviation to group_outliers
+        group_outliers['mean'] = mean
+        group_outliers['std_dev'] = std_dev
+
+        df_without_outliers = pd.concat([df_without_outliers, group_without_outliers])
+        df_outliers = pd.concat([df_outliers, group_outliers])
+
 
     return df_without_outliers, df_outliers
 
