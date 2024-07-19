@@ -69,8 +69,6 @@ class UIManager:
         st.divider()
         st.header("Welcome to the behavioural analysis pipeline!")
         st.write("This pipeline takes in .csv or .tsv files and outputs a csv file with behavioural analysis data and statistics.")
-        subjects = self.data_manager.get_subjects()
-        selected_subject = st.selectbox('Select a subject', subjects)
 
         data_files = st.file_uploader("Upload your data files", type=['csv', 'tsv'], accept_multiple_files=True)
         if data_files:
