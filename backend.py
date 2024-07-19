@@ -176,7 +176,7 @@ def match_start_and_stop_for_behaviour(df: pd.DataFrame) -> pd.DataFrame:
 
     for behavior, group in merged_df.groupby('Behavior'):
         mean = group['Behaviour Duration (s)'].mean()
-        std_dev = group['Behaviour Duration (s)'].std()
+        std_dev = group['Behaviour Duration (s)'].std() if len(group) > 1 else 0
         lower_bound = mean - std_deviation_multiplier * std_dev
         upper_bound = mean + std_deviation_multiplier * std_dev
 
