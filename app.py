@@ -19,7 +19,10 @@ class DataManager:
 
     def load_data(self, data_files):
         self.data_files = data_files
-        self.data = self._load_data()
+        try:
+            self.data = self._load_data()
+        except Exception as e:
+            st.warning(f'An error occurred while loading the data. Please check the selected file(s) and try again. Error {e}')
 
     def _load_data(self):
         dfs = be.import_input_files(self.data_files)
