@@ -84,8 +84,7 @@ class UIManager:
 
                     combined_data = pd.concat(data_frames, ignore_index=True)
                     if 'Subject' in combined_data.columns:
-                        cols = ['Subject'] + [col for col in combined_data if col != 'Subject']
-                        combined_data = combined_data[cols]
+                        combined_data.set_index('Subject', inplace=True)
                     else: 
                         st.error('No subject column found in data. Please contact administrator')
                     st.subheader(f"{data_type.title().replace('_', ' ')}")
