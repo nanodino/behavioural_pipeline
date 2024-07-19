@@ -114,6 +114,10 @@ def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     bout_stats_melt = bout_stats.melt(id_vars=['Subject', 'mixed_bout'], var_name='Stat')
     bout_stats_pivot = bout_stats_melt.pivot_table(index='Subject', columns=['mixed_bout', 'Stat'], values='value')
     bout_stats_pivot.columns = ['_'.join(col).lower() for col in bout_stats_pivot.columns]
+
+    total_bouts = bout_stats_pivot['all_count']
+    mixed_bouts = bout_stats_pivot['mixed_count']
+    bout_stats_pivot['mixed_proportion'] = mixed_bouts / total_bouts
     
     return bout_stats_pivot
 
