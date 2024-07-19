@@ -101,11 +101,11 @@ def calculate_bout_stats(df: pd.DataFrame) -> pd.DataFrame:
     df.rename(columns={'Behaviour Duration (s)': 'Bout Duration (s)'}, inplace=True)
     df['mixed_bout'] = df['mixed_bout'].astype(str).replace({'True': 'Mixed', 'False': 'Non-mixed'})
     
-    bout_stats = df.groupby(['mixed_bout', 'Subject'])['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
+    bout_stats = df.groupby(['mixed_bout', 'Subject'])['Bout Duration (s)'].agg(['count', 'sum', 'mean', 'std', 'var'])
     bout_stats.columns = bout_stats.columns.map(''.join)
     bout_stats.reset_index(inplace=True)
     
-    all_bout_stats = df.groupby('Subject')['Bout Duration (s)'].agg(['sum', 'mean', 'std', 'var'])
+    all_bout_stats = df.groupby('Subject')['Bout Duration (s)'].agg(['count', 'sum', 'mean', 'std', 'var'])
     all_bout_stats.columns = all_bout_stats.columns.map(''.join)
     all_bout_stats.reset_index(inplace=True)
     all_bout_stats['mixed_bout'] = 'All'
