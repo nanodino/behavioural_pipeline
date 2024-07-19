@@ -9,7 +9,8 @@ BOUTS_DATA = 'bouts_data'
 BOUT_STATISTICS = 'bout_statistics'
 LOCATION_STATISTICS = 'location_statistics'
 ALL_SUBJECTS = "All Subjects"
-DATA_TYPES = [RAW_BEHAVIOURAL_DATA, STATISTICS, BOUTS_DATA, BOUT_STATISTICS, LOCATION_STATISTICS]
+OUTLIERS = 'outliers'
+DATA_TYPES = [RAW_BEHAVIOURAL_DATA, STATISTICS, BOUTS_DATA, BOUT_STATISTICS, LOCATION_STATISTICS, OUTLIERS]
 
 class DataManager:
     def __init__(self):
@@ -95,7 +96,7 @@ class UIManager:
 
 def main():
     st.set_page_config(page_title="Behavioural analysis pipeline", page_icon="🧠", initial_sidebar_state="auto", 
-                           menu_items={"About": f'Last deployed on {datetime.datetime.now().strftime("%d/%m/%Y at %H:%M:%S UTC")}'})
+                           menu_items={"About": f'Built using Streamlit and deployed using Heroku. \nLast deployed on {datetime.datetime.now().strftime("%d/%m/%Y at %H:%M:%S UTC")}'})
     data_manager = DataManager()
     ui_manager = UIManager(data_manager)
     ui_manager.display()
